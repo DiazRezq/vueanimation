@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from "vue";
+import gsap from "gsap";
 
 const tasks = ref(["Learn HTML", "Learn CSS", "Learn JS", "Learn Vue"]);
 const newTask = ref("");
@@ -12,17 +13,52 @@ function addTask() {
 function removeTask(index) {
   tasks.value.splice(index, 1);
 }
+
+function beforeEnter(el) {
+  el.style.opacity = 0;
+  el.style.transform = "translateX(-30px)";
+}
+
+function enter(el) {
+  gsap.to(el, {
+    opacity: 1,
+    x: 0,
+    duration: 0.5,
+    delay: el.dataset.index * 0.3,
+  });
+}
+
+function afterEnter() {
+  console.log("afterEnter");
+}
+
+function beforeLeave() {
+  console.log("beforeLeave");
+}
+
+function afterLeave() {
+  console.log("afterLeave");
+}
 </script>
 
 <template>
   <main>
     <div class="container">
       <input type="text" autofocus v-model="newTask" @keyup.enter="addTask()" />
-      <TransitionGroup name="list">
+      <TransitionGroup
+        name="list"
+        appear
+        @before-enter="beforeEnter"
+        @enter="enter"
+        @after-enter="afterEnter"
+        @before-leave="beforeLeave"
+        @after-leave="afterLeave"
+      >
         <div
           class="card-list"
-          v-for="task in tasks"
+          v-for="(task, index) in tasks"
           :key="task"
+          :data-index="index"
           @click="removeTask(tasks.indexOf(task))"
         >
           {{ task }}
@@ -58,17 +94,17 @@ function removeTask(index) {
   cursor: pointer;
 }
 
-.list-enter-from {
+/* .list-enter-from {
   opacity: 0;
   transform: scale(0.8);
-}
-.list-enter-to {
+} */
+/* .list-enter-to {
   opacity: 1;
   transform: scale(1);
 }
 .list-enter-active {
   transition: all 0.5s ease;
-}
+} */
 
 .list-leave-to {
   opacity: 0;
